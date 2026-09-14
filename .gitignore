@@ -1,0 +1,16 @@
+# Dependencies and build
+node_modules
+.next
+out
+
+# Local Hostinger packaging (not source)
+hostinger-static
+deploy-hostinger
+*.zip
+
+# OS / env
+.DS_Store
+*.log
+.vercel
+.env*.local
+.env
