@@ -82,8 +82,8 @@ def probe(user: str, host: str, password: str, proto: str, port: int) -> None:
         [
             *connect_prefix(user, host, password, proto, port),
             "set cmd:fail-exit no",
-            "pwd",
-            "cls -1",
+            "cls -1 domains",
+            "cls -1 domains/ainexia.com",
             "bye",
         ]
     )
@@ -110,7 +110,8 @@ def try_upload(
             "lcd ./out",
             f"cd {lftp_quote(remote)}",
             "mirror -R --no-perms --parallel=4 --overwrite . .",
-            "ls index.html",
+            "set cmd:fail-exit no",
+            "cls -1",
             "bye",
         ]
         result = run_lftp("\n".join(lines))
