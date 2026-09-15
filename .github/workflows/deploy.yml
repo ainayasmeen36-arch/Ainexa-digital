@@ -5,7 +5,7 @@
 #   HOSTINGER_FTP_USERNAME    FULL Hostinger username, e.g. u12345678 or u12345678.ainexadeploy
 #                             (not just ainexadeploy, not your email)
 #   HOSTINGER_FTP_PASSWORD    that FTP user's password (spaces/quotes stripped by the script)
-#   HOSTINGER_FTP_REMOTE_DIR  public_html/   or  ./  if this user already starts in public_html
+#   HOSTINGER_FTP_REMOTE_DIR  public_html     (NOT out — out is only the local build folder)
 #
 # Also enable hPanel → Remote access → SFTP (port 65002). Extra FTP accounts cannot
 # log in as the short name; copy the full username Hostinger shows in the list.
