@@ -16,6 +16,7 @@ export const COMPANY = {
   email: "hello@ainexa.digital",
   phone: "+447762426623",
   whatsapp: "447762426623",
+  website: "https://ainexia.com",
   address: "Global delivery studio — serving North America, Europe, and the GCC.",
   hours: "Monday – Saturday, 9:00 AM – 7:00 PM (PKT)",
 } as const;

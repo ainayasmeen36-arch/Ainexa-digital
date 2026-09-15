@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
 import Link from "next/link";
+import { pageMeta } from "@/lib/seo";
 import { Check } from "lucide-react";
 import { PLANS } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = {
+export const metadata = pageMeta({
   title: "Pricing",
   description:
     "Starter, Growth, and Enterprise engagement plans from AINEXA Digital Solutions — transparent starting points, custom scoped after discovery.",
-};
+  path: "/pricing/",
+});
 
 export default function PricingPage() {
   return (

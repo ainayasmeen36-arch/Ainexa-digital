@@ -1,16 +1,17 @@
-import type { Metadata } from "next";
 import Image from "next/image";
+import { pageMeta } from "@/lib/seo";
 import { Check } from "lucide-react";
 import { SectionHeading } from "@/components/section-heading";
 import { SERVICE_ICONS, ServiceIcon } from "@/components/service-icon";
 import { SERVICES } from "@/lib/data";
 import { Card, CardContent } from "@/components/ui/card";
 
-export const metadata: Metadata = {
+export const metadata = pageMeta({
   title: "Services",
   description:
     "Custom software, MERN and Next.js web development, AI bots, SEO, UI/UX, mobile apps, and cloud solutions from AINEXA Digital Solutions.",
-};
+  path: "/services/",
+});
 
 export default function ServicesPage() {
   return (

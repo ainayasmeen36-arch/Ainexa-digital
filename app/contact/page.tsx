@@ -1,13 +1,14 @@
-import type { Metadata } from "next";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { COMPANY } from "@/lib/data";
 import { ContactForm } from "@/components/contact-form";
 import { Button } from "@/components/ui/button";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = pageMeta({
   title: "Contact",
-  description: `Book a free consultation with ${COMPANY.name}. Email ${COMPANY.email} or message us on WhatsApp.`,
-};
+  description: `Book a free consultation with ${COMPANY.name}. Email ${COMPANY.email} or WhatsApp ${COMPANY.phone}. Custom software, websites, AI bots, and SEO.`,
+  path: "/contact/",
+});
 
 export default function ContactPage() {
   const mapSrc =

@@ -1,12 +1,13 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import { COMPANY, IMAGES } from "@/lib/data";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = pageMeta({
   title: "About Aina Yasmeen",
   description:
     "Meet Aina Yasmeen, Founder & CEO of AINEXA Digital Solutions — a studio built on accurate, efficient, and scalable digital work.",
-};
+  path: "/about/",
+});
 
 export default function AboutPage() {
   return (

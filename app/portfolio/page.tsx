@@ -1,11 +1,12 @@
-import type { Metadata } from "next";
 import { PortfolioGrid } from "@/components/portfolio-grid";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = pageMeta({
   title: "Our Work",
   description:
     "Selected AINEXA Digital Solutions projects across custom software, web, AI, mobile, cloud, and product design.",
-};
+  path: "/portfolio/",
+});
 
 export default function PortfolioPage() {
   return (

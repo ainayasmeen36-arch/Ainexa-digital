@@ -1,10 +1,12 @@
-import type { Metadata } from "next";
 import { AdminDashboard } from "@/components/admin/admin-dashboard";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = pageMeta({
   title: "Studio dashboard",
-  robots: { index: false, follow: false },
-};
+  description: "Internal AINEXA studio dashboard.",
+  path: "/admin/",
+  index: false,
+});
 
 export default function AdminPage() {
   return <AdminDashboard />;
