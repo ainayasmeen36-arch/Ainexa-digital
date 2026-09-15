@@ -1,4 +1,4 @@
-"""Upload Next.js `out/` contents into Hostinger public_html over SFTP."""
+"""Upload Next.js `out/` into the Hostinger domain web root over SFTP."""
 
 from __future__ import annotations
 
@@ -33,17 +33,18 @@ def clean_password(raw: str) -> str:
 
 def remote_candidates(raw: str) -> list[str]:
     remote = raw.strip().replace("\r", "").strip("/")
-    skip = {"", ".", "out", "./out"}
-    candidates: list[str] = []
+    skip = {"", ".", "out", "./out", "public_html"}
+    candidates = [
+        f"domains/{SITE_DOMAIN}/public_html",
+        f"domains/www.{SITE_DOMAIN}/public_html",
+    ]
     if remote and remote not in skip and remote not in candidates:
-        candidates.append(remote)
-    for item in ("public_html", f"domains/{SITE_DOMAIN}/public_html", "."):
-        if item not in candidates:
-            candidates.append(item)
+        candidates.insert(0, remote)
+    candidates.extend(["public_html", "."])
     return candidates
 
 
-def run_lftp(script: str, password: str) -> subprocess.CompletedProcess[str]:
+def run_lftp(script: str) -> subprocess.CompletedProcess[str]:
     path = None
     try:
         with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as handle:
@@ -63,18 +64,32 @@ def redact(text: str, password: str) -> str:
 
 
 def connect_prefix(user: str, host: str, password: str, proto: str, port: int) -> list[str]:
-    ssl_allow = "true" if proto == "ftps" else "false"
     return [
         "set ssl:verify-certificate no",
-        f"set ftp:ssl-allow {ssl_allow}",
+        "set ftp:ssl-allow false",
         "set ftp:ssl-force false",
         "set ftp:passive-mode true",
         "set net:max-retries 1",
-        "set net:timeout 25",
+        "set net:timeout 30",
         "set sftp:auto-confirm yes",
         f"open -p {port} {proto}://{host}",
         f"user {lftp_quote(user)} {lftp_quote(password)}",
     ]
+
+
+def probe(user: str, host: str, password: str, proto: str, port: int) -> None:
+    script = "\n".join(
+        [
+            *connect_prefix(user, host, password, proto, port),
+            "set cmd:fail-exit no",
+            "pwd",
+            "cls -1",
+            "bye",
+        ]
+    )
+    result = run_lftp(script)
+    print("Remote listing:")
+    print(redact(f"{result.stdout}\n{result.stderr}", password)[-2500:])
 
 
 def try_upload(
@@ -86,29 +101,27 @@ def try_upload(
     remotes: list[str],
 ) -> bool:
     print(f"Trying {proto}://{host}:{port} (username length {len(user)})")
+    probe(user, host, password, proto, port)
+
     for remote in remotes:
         lines = [
             *connect_prefix(user, host, password, proto, port),
             "set cmd:fail-exit yes",
             "lcd ./out",
+            f"cd {lftp_quote(remote)}",
+            "mirror -R --no-perms --parallel=4 --overwrite . .",
+            "ls index.html",
+            "bye",
         ]
-        if remote != ".":
-            lines.append(f"mkdir -p {lftp_quote(remote)}")
-        lines.extend(
-            [
-                f"cd {lftp_quote(remote)}",
-                "mirror -R --no-perms --parallel=4 . .",
-                "bye",
-            ]
-        )
-        result = run_lftp("\n".join(lines), password)
+        result = run_lftp("\n".join(lines))
+        combined = redact(f"{result.stdout}\n{result.stderr}".strip(), password)
         if result.returncode == 0:
             print(f"Deploy succeeded via {proto} port {port} into {remote}")
+            if combined:
+                print(combined[-800:])
             return True
-        combined = redact(f"{result.stdout}\n{result.stderr}".strip(), password)
         if combined:
-            print(combined[-1500:])
-        # Login failed — do not try other remote folders on this protocol.
+            print(combined[-1200:])
         if re.search(r"530 |Login incorrect|Login failed|authentication failed", combined, re.I):
             return False
         if re.search(r"Connection refused", combined, re.I):
@@ -117,8 +130,8 @@ def try_upload(
 
 
 def main() -> int:
-    if not os.path.isdir("out"):
-        print("Local out/ folder is missing. Build did not produce a static export.")
+    if not os.path.isdir("out") or not os.path.isfile("out/index.html"):
+        print("Local out/index.html is missing.")
         return 1
 
     host = clean_host(os.environ.get("FTP_SERVER", ""))
@@ -130,23 +143,13 @@ def main() -> int:
         print("FTP_SERVER, FTP_USERNAME, or FTP_PASSWORD is empty")
         return 1
 
-    print(
-        f"user_len={len(user)} password_len={len(password)} "
-        f"remote_candidates={remotes}"
-    )
+    print(f"user_len={len(user)} remote_candidates={remotes}")
 
-    # Main Hostinger user (u12345678) authenticates on SFTP :65002.
-    attempts = [("sftp", 65002), ("ftp", 21)]
-
-    for proto, port in attempts:
+    for proto, port in (("sftp", 65002), ("ftp", 21)):
         if try_upload(user, host, password, proto, port, remotes):
             return 0
 
-    print(
-        "Deploy failed. For the main Hostinger user, keep SFTP enabled, "
-        "set HOSTINGER_FTP_REMOTE_DIR to public_html/ (not out/), "
-        "and use the u12345678 username plus that account's FTP password."
-    )
+    print("Could not cd into the Hostinger web root. Check domains/ainexia.com/public_html in File Manager.")
     return 1
 
 
