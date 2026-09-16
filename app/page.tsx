@@ -18,7 +18,11 @@ export const metadata = pageMeta({
 
 export default function HomePage() {
   return (
+return (
     <>
+      <div style={{background: 'yellow', padding: '10px', textAlign: 'center'}}>
+        Hello - Ye Mera Naya Design Hai! - Aina Test
+      </div>
       <Hero />
       <StatsBar />
       <TrustedBy />
@@ -29,4 +33,3 @@ export default function HomePage() {
       <HomeCta />
     </>
   );
-}
